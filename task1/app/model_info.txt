@@ -1,0 +1,9 @@
+R-squared: 0.9811236825879982
+Coefficients:
+square_footage: -174.73127092067
+bedrooms: -7844.283366301547
+bathrooms: 1068.8015644156837
+year_built: 2220.81258355607
+lot_size: 41.84406427559825
+distance_to_city_center: 19602.871463088264
+school_rating: 25338.600759634453
