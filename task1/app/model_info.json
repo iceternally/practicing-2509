@@ -1,0 +1,14 @@
+{
+    "r_squared": 0.980574133631031,
+    "training_r_squared": 0.9901693495555546,
+    "generalization_gap": 0.009595215924523615,
+    "coefficients": {
+        "lot_size": 19412.403267253678,
+        "house_age": -10321.478740288614,
+        "school_rating": 19166.01194467249,
+        "distance_to_city_center": 32598.707294777112,
+        "bedrooms": -3450.9640467299278,
+        "bathrooms": 670.2770974219472,
+        "footage_lot_ratio": -7154.93288081112
+    }
+}
