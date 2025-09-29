@@ -1,2 +1,9 @@
 *.csv
 __pycache__
+target/
+
+# dependencies
+/node_modules
+
+# next.js
+/.next/
