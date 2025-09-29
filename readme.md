@@ -17,6 +17,37 @@ The system components work together as follows:
 - **Task 2** provides a complete web portal with property market analysis and value estimation
 - **Task 3** outlines the production-ready cloud infrastructure for deploying the entire system
 
+## Quick Demonstration
+
+Here's a visual overview of the Property Portal system in action:
+
+### Task 1: FastAPI ML Backend Interface
+![FastAPI Swagger Documentation](docs/screenshots/fastapi.png)
+*FastAPI Swagger UI showing the property value prediction endpoints*
+
+### Task 2: Property Portal Web Application
+
+#### Property Value Estimator Frontend
+![Property Value Estimator Interface 1](docs/screenshots/Property%20Value%20Estimator1.png)
+*Property Value Estimator input form for property characteristics*
+
+![Property Value Estimator Interface 2](docs/screenshots/Property%20Value%20Estimator2.png)
+*Property Value Estimator results and prediction display*
+
+#### Property Market Analysis Backend
+![Property Market Analysis Main](docs/screenshots/Property%20Market%20Analysis.png)
+*Property Market Analysis dashboard overview*
+
+![Property Market Analysis Table](docs/screenshots/Property%20Market%20Analysis-table.png)
+*Market analysis data table with detailed property information*
+
+![Property Market Analysis Interface](docs/screenshots/Property%20Market%20Analysis-if.png)
+*Market analysis interface showing trends and analytics*
+
+### Complete Portal Overview
+![Property Portal Overview](docs/screenshots/portal.png)
+*Complete Property Portal system interface*
+
 ---
 
 ## Task 1: Property Value Estimator (Python ML Backend)
