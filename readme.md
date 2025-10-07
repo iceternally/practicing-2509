@@ -55,7 +55,7 @@ Here's a visual overview of the Property Portal system in action:
 A machine learning API that provides property value predictions based on various property characteristics.
 
 ### Features
-- Single and batch property value predictions
+- Single and batch property value predictions (send a top-level JSON array; use a single-element array for single prediction)
 - RESTful API with FastAPI
 - Swagger UI documentation
 - Health and model info endpoints
@@ -99,49 +99,45 @@ curl -X GET http://localhost:8000/health
 curl -X GET http://localhost:8000/model-info
 ```
 
-**Single Property Prediction:**
+**Single Property Prediction (send a single-element array):**
 ```bash
 curl -X POST http://localhost:8000/predict \
-    -H "Content-Type: application/json" \
-    -d '{
-        "data": {
-            "square_footage": 2000,
-            "bedrooms": 3,
-            "bathrooms": 2.5,
-            "year_built": 2010,
-            "lot_size": 8000,
-            "distance_to_city_center": 5.2,
-            "school_rating": 8.5
-        }
-    }'
+  -H "Content-Type: application/json" \
+  -d '[{
+    "square_footage": 2000,
+    "bedrooms": 3,
+    "bathrooms": 2.5,
+    "year_built": 2010,
+    "lot_size": 8000,
+    "distance_to_city_center": 5.2,
+    "school_rating": 8.5
+  }]'
 ```
 
 **Multiple Properties Prediction:**
 ```bash
 curl -X POST http://localhost:8000/predict \
-    -H "Content-Type: application/json" \
-    -d '{
-        "data": [
-            {
-                "square_footage": 2000,
-                "bedrooms": 3,
-                "bathrooms": 2.5,
-                "year_built": 2010,
-                "lot_size": 8000,
-                "distance_to_city_center": 5.2,
-                "school_rating": 8.5
-            },
-            {
-                "square_footage": 1500,
-                "bedrooms": 2,
-                "bathrooms": 2.0,
-                "year_built": 2015,
-                "lot_size": 6000,
-                "distance_to_city_center": 3.8,
-                "school_rating": 9.0
-            }
-        ]
-    }'
+  -H "Content-Type: application/json" \
+  -d '[
+    {
+      "square_footage": 2000,
+      "bedrooms": 3,
+      "bathrooms": 2.5,
+      "year_built": 2010,
+      "lot_size": 8000,
+      "distance_to_city_center": 5.2,
+      "school_rating": 8.5
+    },
+    {
+      "square_footage": 1500,
+      "bedrooms": 2,
+      "bathrooms": 2.0,
+      "year_built": 2015,
+      "lot_size": 6000,
+      "distance_to_city_center": 3.8,
+      "school_rating": 9.0
+    }
+  ]'
 ```
 
 ---

@@ -31,12 +31,6 @@ class HouseFeatures(BaseModel):
     distance_to_city_center: float
     school_rating: float
 
-class BatchHouseFeatures(BaseModel):
-    houses: List[HouseFeatures]
-
-class PredictionInput(BaseModel):
-    data: Union[HouseFeatures, List[HouseFeatures]]
-
 @app.get("/health")
 def health():
     return {"status": "ok"}
@@ -68,22 +62,16 @@ def prepare_features(features_data: Union[Dict[str, Any], List[Dict[str, Any]]])
     return df[model_features]
 
 @app.post("/predict")
-def predict(input_data: PredictionInput) -> Dict[str, Union[float, List[float]]]:
+def predict(input_data: List[HouseFeatures]) -> Dict[str, List[float]]:
     try:
-        # Handle both single and batch inputs
-        if isinstance(input_data.data, list):
-            # Batch prediction
-            features_list = [house.model_dump() for house in input_data.data]
-            df = prepare_features(features_list)
-            df_scaled = scaler.transform(df)
-            predictions = model.predict(df_scaled)
-            return {"predictions": [round(float(pred), 2) for pred in predictions]}
-        else:
-            # Single prediction
-            features_dict = input_data.data.model_dump()
-            df = prepare_features(features_dict)
-            df_scaled = scaler.transform(df)
-            prediction = model.predict(df_scaled)
-            return {"prediction": round(float(prediction[0]), 2)}
+        # Expect a top-level array for batch predictions (use a single-element array for single prediction)
+        if not input_data:
+            raise HTTPException(status_code=400, detail="Prediction error: empty input array")
+        
+        features_list = [house.model_dump() for house in input_data]
+        df = prepare_features(features_list)
+        df_scaled = scaler.transform(df)
+        predictions = model.predict(df_scaled)
+        return {"predictions": [round(float(pred), 2) for pred in predictions]}
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Prediction error: {str(e)}")
