@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { usePrediction } from '@/hooks';
+
 import { ComparisonProperty } from './PropertyComparison';
 import PropertyResults from './PropertyResults';
 
@@ -48,9 +50,14 @@ const PropertyForm = ({ onAddToComparison }: PropertyFormProps) => {
   const [prediction, setPrediction] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Removed local isSubmitting state in favor of hook loading state
+  // const [isSubmitting, setIsSubmitting] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [announceMessage, setAnnounceMessage] = useState<string>('');
+  
+  // Integrate prediction hook
+  const { loading, error: apiError, predict } = usePrediction();
+  const isSubmitting = loading;
   
   // Refs for accessibility
   const errorSummaryRef = useRef<HTMLDivElement>(null);
@@ -165,73 +172,53 @@ const PropertyForm = ({ onAddToComparison }: PropertyFormProps) => {
     e.preventDefault();
     setError(null);
     setPrediction(null);
-
+  
     // Validate form before submission
     if (!validateForm()) {
       setError('Please fix the validation errors before submitting');
       return;
     }
-
-    setIsSubmitting(true);
-
+  
     try {
-      const response = await fetch('/api/predict', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const values = await predict([
+        {
+          square_footage: parseFloat(formData.square_footage),
+          bedrooms: parseInt(formData.bedrooms),
+          bathrooms: parseFloat(formData.bathrooms),
+          year_built: parseInt(formData.year_built),
+          lot_size: parseFloat(formData.lot_size),
+          distance_to_city_center: parseFloat(formData.distance_to_city_center),
+          school_rating: parseFloat(formData.school_rating),
         },
-        body: JSON.stringify([
-          {
-            square_footage: parseFloat(formData.square_footage),
-            bedrooms: parseInt(formData.bedrooms),
-            bathrooms: parseFloat(formData.bathrooms),
-            year_built: parseInt(formData.year_built),
-            lot_size: parseFloat(formData.lot_size),
-            distance_to_city_center: parseFloat(formData.distance_to_city_center),
-            school_rating: parseFloat(formData.school_rating),
+      ]);
+  
+      if (values && values.length > 0) {
+        const predictionValue = values[0];
+        setPrediction(predictionValue);
+        setAnnounceMessage(`Property estimate completed. Estimated value is $${predictionValue.toLocaleString()}.`);
+  
+        // Add to history
+        const historyEntry: HistoryEntry = {
+          id: Date.now().toString(),
+          timestamp: new Date(),
+          propertyData: {
+            square_footage: Number(formData.square_footage),
+            bedrooms: Number(formData.bedrooms),
+            bathrooms: Number(formData.bathrooms),
+            year_built: Number(formData.year_built),
+            lot_size: Number(formData.lot_size),
+            distance_to_city_center: Number(formData.distance_to_city_center),
+            school_rating: Number(formData.school_rating),
           },
-        ]),
-      });
-
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Prediction API error ${response.status}: ${errText}`);
-      }
-
-      const result = await response.json();
-      
-      // Validate the response structure for the new API contract (array of predictions)
-      if (Array.isArray(result.predictions) && result.predictions.length > 0) {
-        const predictionValue = result.predictions[0];
-        if (typeof predictionValue === 'number' && !isNaN(predictionValue)) {
-          setPrediction(predictionValue);
-          setAnnounceMessage(`Property estimate completed. Estimated value is $${predictionValue.toLocaleString()}.`);
-          
-          // Add to history
-          const historyEntry: HistoryEntry = {
-            id: Date.now().toString(),
-            timestamp: new Date(),
-            propertyData: {
-              square_footage: Number(formData.square_footage),
-              bedrooms: Number(formData.bedrooms),
-              bathrooms: Number(formData.bathrooms),
-              year_built: Number(formData.year_built),
-              lot_size: Number(formData.lot_size),
-              distance_to_city_center: Number(formData.distance_to_city_center),
-              school_rating: Number(formData.school_rating),
-            },
-            estimatedValue: predictionValue,
-          };
-          
-          setHistory(prev => [historyEntry, ...prev]);
-          
-          // Focus on result after a brief delay
-          setTimeout(() => {
-            resultRef.current?.focus();
-          }, 100);
-        } else {
-          throw new Error('Invalid prediction value received from server');
-        }
+          estimatedValue: predictionValue,
+        };
+  
+        setHistory((prev) => [historyEntry, ...prev]);
+  
+        // Focus on result after a brief delay
+        setTimeout(() => {
+          resultRef.current?.focus();
+        }, 100);
       } else {
         throw new Error('Invalid response structure from server');
       }
@@ -239,8 +226,6 @@ const PropertyForm = ({ onAddToComparison }: PropertyFormProps) => {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred while fetching the prediction';
       setError(errorMessage);
       setAnnounceMessage(`Error occurred: ${errorMessage}`);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -589,7 +574,7 @@ const PropertyForm = ({ onAddToComparison }: PropertyFormProps) => {
 
          <PropertyResults
            prediction={prediction}
-           error={error}
+           error={error || apiError}
            resultRef={resultRef}
            onAddToComparison={onAddToComparison}
            propertyData={{
@@ -599,7 +584,7 @@ const PropertyForm = ({ onAddToComparison }: PropertyFormProps) => {
              year_built: Number(formData.year_built),
              lot_size: Number(formData.lot_size),
              distance_to_city_center: Number(formData.distance_to_city_center),
-             school_rating: Number(formData.school_rating)
+             school_rating: Number(formData.school_rating),
            }}
          />
         </form>
@@ -693,5 +678,7 @@ const PropertyForm = ({ onAddToComparison }: PropertyFormProps) => {
     </div>
   );
 };
+
+
 
 export default PropertyForm;

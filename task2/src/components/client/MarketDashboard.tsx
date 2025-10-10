@@ -8,22 +8,24 @@ import WhatIfAnalyzer from './WhatIfAnalyzer';
 import DataExporter from './DataExporter';
 import { Filter, BarChart3, Calculator, Download, Eye, EyeOff } from 'lucide-react';
 
+import { useHousingData } from '@/hooks';
+
 interface MarketDashboardProps {
   marketData: PropertyData[];
 }
 
 const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
-  const [data, setData] = useState<PropertyData[]>(initialData);
+  // Replace manual data state with housing data hook, seeding with server data
+  const { data, loading, error, lastUpdated, refetch } = useHousingData({ initialData, revalidateMs: 60_000, immediate: false });
   const [filteredData, setFilteredData] = useState<PropertyData[]>(initialData);
   const [filters, setFilters] = useState<Partial<MarketFilters>>({});
   const [activeView, setActiveView] = useState<'overview' | 'table' | 'analysis'>('overview');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Update data when initialData changes
+  // Update filtered data when data changes
   useEffect(() => {
-    setData(initialData);
-    setFilteredData(initialData);
-  }, [initialData]);
+    setFilteredData(data);
+  }, [data]);
 
   // Apply filters whenever filters or data change (use current data)
   useEffect(() => {
@@ -76,6 +78,15 @@ const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
           <p className="text-gray-600 mt-1">
             Showing {filteredData.length} of {data.length} properties
           </p>
+          {error && (
+            <p className="text-red-600 text-sm mt-1" role="alert">Failed to refresh market data: {error}</p>
+          )}
+          {loading && (
+            <p className="text-gray-500 text-sm mt-1">Refreshing market data...</p>
+          )}
+          {lastUpdated && (
+            <p className="text-gray-400 text-xs mt-1">Last updated: {new Date(lastUpdated).toLocaleTimeString()}</p>
+          )}
         </div>
         
         {/* View Controls */}
@@ -90,6 +101,13 @@ const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
           >
             {showFilters ? <EyeOff size={16} /> : <Eye size={16} />}
             {showFilters ? 'Hide Filters' : 'Show Filters'}
+          </button>
+          <button
+            onClick={() => refetch()}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+            aria-label="Refresh market data"
+          >
+            <Download size={16} /> Refresh Data
           </button>
           
           <div className="flex bg-gray-100 rounded-lg p-1">
