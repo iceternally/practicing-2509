@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { apiClient } from '@/services/apiClient';
 
 export interface PredictionInput {
   square_footage: number;
@@ -52,20 +53,22 @@ export function usePrediction(): UsePredictionResult {
     setError(null);
 
     try {
-      const res = await fetch('/api/predict', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        signal: controller.signal,
-        cache: 'no-store',
-      });
+      const res = await apiClient.request<{ predictions: number[] }>(
+        '/api/predict',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+          cache: 'no-store',
+        }
+      );
 
       if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`Prediction API error ${res.status}: ${text}`);
+        throw new Error(res.error || `Prediction API error ${res.status}`);
       }
 
-      const data = await res.json();
+      const data = res.data as { predictions: number[] };
       const values: number[] | undefined = Array.isArray(data?.predictions)
         ? data.predictions.filter((n: any) => typeof n === 'number' && !Number.isNaN(n))
         : undefined;

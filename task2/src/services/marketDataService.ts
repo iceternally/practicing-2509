@@ -107,20 +107,27 @@ export const sampleHousingData: PropertyData[] = [
   { id: 50, square_footage: 1480, bedrooms: 3, bathrooms: 1.5, year_built: 1992, lot_size: 6300, distance_to_city_center: 3.4, school_rating: 7.5, price: 220000 }
 ];
 
+import { apiClient } from '@/services/apiClient';
 export class MarketDataService {
   private data: PropertyData[] = sampleHousingData;
   private apiBaseUrl = '/api/market-analysis';
 
   // Fetch housing data from internal API route with revalidation
-  async fetchHousingData(): Promise<PropertyData[]> {
+  async fetchHousingData(signal?: AbortSignal): Promise<PropertyData[]> {
+    const meta = await this.fetchHousingDataWithMeta(signal);
+    return meta.data;
+  }
+
+  // Fetch housing data and include fallback indicator from response headers
+  async fetchHousingDataWithMeta(signal?: AbortSignal): Promise<{ data: PropertyData[]; usingFallback: boolean }> {
     try {
-      const response = await fetch(`${this.apiBaseUrl}/housing`, {
-        next: { revalidate: 60 },
-      });
+      const response = await apiClient.request<any>(`${this.apiBaseUrl}/housing`, { signal, cache: 'no-store' });
+      console.log('API response :', response);
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(response.error || `HTTP error! status: ${response.status}`);
       }
-      const apiData = await response.json();
+      const apiData = response.data as any[];
+      const usingFallback = response.headers.get('x-fallback') === 'true';
 
       // Transform API data to match our PropertyData interface
       const transformed = apiData.map((item: any, index: number) => ({
@@ -135,11 +142,11 @@ export class MarketDataService {
         price: item.price || 0,
       }));
 
-      return transformed;
+      return { data: transformed, usingFallback };
     } catch (error) {
       console.error('Failed to fetch housing data from API:', error);
       // Fallback to sample data if API fails
-      return sampleHousingData;
+      return { data: sampleHousingData, usingFallback: true };
     }
   }
 

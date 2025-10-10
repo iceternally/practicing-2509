@@ -16,7 +16,7 @@ interface MarketDashboardProps {
 
 const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
   // Replace manual data state with housing data hook, seeding with server data
-  const { data, loading, error, lastUpdated, refetch } = useHousingData({ initialData, revalidateMs: 60_000, immediate: false });
+  const { data, loading, error, lastUpdated, refetch, usingFallback } = useHousingData({ initialData, revalidateMs: 60_000, immediate: false });
   const [filteredData, setFilteredData] = useState<PropertyData[]>(initialData);
   const [filters, setFilters] = useState<Partial<MarketFilters>>({});
   const [activeView, setActiveView] = useState<'overview' | 'table' | 'analysis'>('overview');
@@ -85,7 +85,14 @@ const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
             <p className="text-gray-500 text-sm mt-1">Refreshing market data...</p>
           )}
           {lastUpdated && (
-            <p className="text-gray-400 text-xs mt-1">Last updated: {new Date(lastUpdated).toLocaleTimeString()}</p>
+            <p className="text-gray-400 text-xs mt-1">
+              Last updated: <time dateTime={new Date(lastUpdated).toISOString()} suppressHydrationWarning={true}>
+                {new Date(lastUpdated).toLocaleTimeString('en-GB', { hour12: false })}
+              </time>
+            </p>
+          )}
+          {usingFallback && (
+            <p className="text-amber-600 text-xs mt-1" role="status">Showing sample data (fallback)</p>
           )}
         </div>
         

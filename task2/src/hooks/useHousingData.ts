@@ -18,6 +18,7 @@ export interface UseHousingDataResult {
   error: string | null;
   lastUpdated: number | null;
   refetch: () => Promise<void>;
+  usingFallback: boolean;
 }
 
 /**
@@ -31,6 +32,7 @@ export function useHousingData(options: UseHousingDataOptions = {}): UseHousingD
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<number | null>(initialData ? Date.now() : null);
+  const [usingFallback, setUsingFallback] = useState<boolean>(false);
 
   const abortRef = useRef<AbortController | null>(null);
   const intervalRef = useRef<number | null>(null);
@@ -50,9 +52,10 @@ export function useHousingData(options: UseHousingDataOptions = {}): UseHousingD
     setError(null);
 
     try {
-      // marketDataService.fetchHousingData internally calls our API route
-      const result = await marketDataService.fetchHousingData();
-      setData(result);
+      // Fetch data with meta to include fallback indicator from headers
+      const result = await marketDataService.fetchHousingDataWithMeta(controller.signal);
+      setData(result.data);
+      setUsingFallback(result.usingFallback);
       setLastUpdated(Date.now());
     } catch (e: any) {
       const message = e?.name === 'AbortError' ? 'Request canceled' : e?.message || 'Failed to fetch housing data';
@@ -86,5 +89,5 @@ export function useHousingData(options: UseHousingDataOptions = {}): UseHousingD
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refetch]);
 
-  return { data, loading, error, lastUpdated, refetch };
+  return { data, loading, error, lastUpdated, refetch, usingFallback };
 }
