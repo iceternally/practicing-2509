@@ -5,6 +5,7 @@ import { PropertyData } from '@/services/marketDataService';
 import { Download, FileText, Table, Loader2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+// @ts-ignore
 import { saveAs } from 'file-saver';
 
 interface DataExporterProps {

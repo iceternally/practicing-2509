@@ -1,4 +1,5 @@
-import MarketDashboard from '@/components/MarketDashboard';
+import MarketDashboard from '@/components/client/MarketDashboard';
+import PageHeader from '@/components/server/PageHeader';
 import { marketDataService } from '@/services/marketDataService';
 
 async function getMarketData() {
@@ -16,7 +17,10 @@ const PropertyMarketAnalysisPage = async () => {
   
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Property Market Analysis</h1>
+      <PageHeader 
+        title="Property Market Analysis"
+        description="Comprehensive market insights and trends for informed real estate decisions."
+      />
       <MarketDashboard marketData={marketData} />
     </div>
   );

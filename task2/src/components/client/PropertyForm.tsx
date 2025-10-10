@@ -180,8 +180,8 @@ const PropertyForm = ({ onAddToComparison }: PropertyFormProps) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          data: {
+        body: JSON.stringify([
+          {
             square_footage: parseFloat(formData.square_footage),
             bedrooms: parseInt(formData.bedrooms),
             bathrooms: parseFloat(formData.bathrooms),
@@ -190,7 +190,7 @@ const PropertyForm = ({ onAddToComparison }: PropertyFormProps) => {
             distance_to_city_center: parseFloat(formData.distance_to_city_center),
             school_rating: parseFloat(formData.school_rating),
           },
-        }),
+        ]),
       });
 
       if (!response.ok) {
@@ -199,11 +199,9 @@ const PropertyForm = ({ onAddToComparison }: PropertyFormProps) => {
 
       const result = await response.json();
       
-      // Validate the response structure
-      // if (result && result.prediction && Array.isArray(result.prediction) && result.prediction.length > 0) {
-      if (result && result.prediction) {
-        // const predictionValue = result.prediction[0];
-        const predictionValue = result.prediction;
+      // Validate the response structure for the new API contract (array of predictions)
+      if (Array.isArray(result.predictions) && result.predictions.length > 0) {
+        const predictionValue = result.predictions[0];
         if (typeof predictionValue === 'number' && !isNaN(predictionValue)) {
           setPrediction(predictionValue);
           setAnnounceMessage(`Property estimate completed. Estimated value is $${predictionValue.toLocaleString()}.`);
