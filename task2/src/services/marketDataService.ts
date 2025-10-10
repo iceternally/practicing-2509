@@ -109,19 +109,21 @@ export const sampleHousingData: PropertyData[] = [
 
 export class MarketDataService {
   private data: PropertyData[] = sampleHousingData;
-  private apiBaseUrl = 'http://127.0.0.1:8080/api/market-analysis';
+  private apiBaseUrl = '/api/market-analysis';
 
-  // Fetch housing data from API
+  // Fetch housing data from internal API route with revalidation
   async fetchHousingData(): Promise<PropertyData[]> {
     try {
-      const response = await fetch(`${this.apiBaseUrl}/housing`);
+      const response = await fetch(`${this.apiBaseUrl}/housing`, {
+        next: { revalidate: 60 },
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const apiData = await response.json();
-      
+
       // Transform API data to match our PropertyData interface
-      this.data = apiData.map((item: any, index: number) => ({
+      const transformed = apiData.map((item: any, index: number) => ({
         id: index + 1,
         square_footage: item.squareFootage || item.square_footage || 0,
         bedrooms: item.bedrooms || 0,
@@ -130,10 +132,10 @@ export class MarketDataService {
         lot_size: item.lotSize || item.lot_size || 0,
         distance_to_city_center: item.distanceToCityCenter || item.distance_to_city_center || 0,
         school_rating: item.schoolRating || item.school_rating || 0,
-        price: item.price || 0
+        price: item.price || 0,
       }));
-      
-      return this.data;
+
+      return transformed;
     } catch (error) {
       console.error('Failed to fetch housing data from API:', error);
       // Fallback to sample data if API fails
@@ -146,51 +148,51 @@ export class MarketDataService {
     return this.data;
   }
 
-  // Filter properties based on criteria
-  filterProperties(filters: Partial<MarketFilters>): PropertyData[] {
-    return this.data.filter(property => {
+  // Filter properties based on criteria (pure: accept data as parameter)
+  filterProperties(filters: Partial<MarketFilters>, properties: PropertyData[] = this.data): PropertyData[] {
+    return properties.filter(property => {
       if (filters.priceRange) {
         if (property.price < filters.priceRange.min || property.price > filters.priceRange.max) {
           return false;
         }
       }
-      
+
       if (filters.bedrooms && filters.bedrooms.length > 0) {
         if (!filters.bedrooms.includes(property.bedrooms)) {
           return false;
         }
       }
-      
+
       if (filters.bathrooms && filters.bathrooms.length > 0) {
         if (!filters.bathrooms.includes(Math.floor(property.bathrooms))) {
           return false;
         }
       }
-      
+
       if (filters.yearBuiltRange) {
         if (property.year_built < filters.yearBuiltRange.min || property.year_built > filters.yearBuiltRange.max) {
           return false;
         }
       }
-      
+
       if (filters.squareFootageRange) {
         if (property.square_footage < filters.squareFootageRange.min || property.square_footage > filters.squareFootageRange.max) {
           return false;
         }
       }
-      
+
       if (filters.schoolRatingRange) {
         if (property.school_rating < filters.schoolRatingRange.min || property.school_rating > filters.schoolRatingRange.max) {
           return false;
         }
       }
-      
+
       if (filters.distanceRange) {
         if (property.distance_to_city_center < filters.distanceRange.min || property.distance_to_city_center > filters.distanceRange.max) {
           return false;
         }
       }
-      
+
       return true;
     });
   }
@@ -270,8 +272,8 @@ export class MarketDataService {
     }).filter(segment => segment.count > 0);
   }
 
-  // Get data ranges for filter initialization
-  getDataRanges(): {
+  // Get data ranges for filter initialization (pure: accept data as parameter)
+  getDataRanges(properties: PropertyData[] = this.data): {
     priceRange: { min: number; max: number };
     yearBuiltRange: { min: number; max: number };
     squareFootageRange: { min: number; max: number };
@@ -280,13 +282,13 @@ export class MarketDataService {
     bedroomOptions: number[];
     bathroomOptions: number[];
   } {
-    const prices = this.data.map(p => p.price);
-    const years = this.data.map(p => p.year_built);
-    const sqFt = this.data.map(p => p.square_footage);
-    const ratings = this.data.map(p => p.school_rating);
-    const distances = this.data.map(p => p.distance_to_city_center);
-    const bedrooms = [...new Set(this.data.map(p => p.bedrooms))].sort((a, b) => a - b);
-    const bathrooms = [...new Set(this.data.map(p => Math.floor(p.bathrooms)))].sort((a, b) => a - b);
+    const prices = properties.map(p => p.price);
+    const years = properties.map(p => p.year_built);
+    const sqFt = properties.map(p => p.square_footage);
+    const ratings = properties.map(p => p.school_rating);
+    const distances = properties.map(p => p.distance_to_city_center);
+    const bedrooms = [...new Set(properties.map(p => p.bedrooms))].sort((a, b) => a - b);
+    const bathrooms = [...new Set(properties.map(p => Math.floor(p.bathrooms)))].sort((a, b) => a - b);
 
     return {
       priceRange: { min: Math.min(...prices), max: Math.max(...prices) },
@@ -295,7 +297,7 @@ export class MarketDataService {
       schoolRatingRange: { min: Math.min(...ratings), max: Math.max(...ratings) },
       distanceRange: { min: Math.min(...distances), max: Math.max(...distances) },
       bedroomOptions: bedrooms,
-      bathroomOptions: bathrooms
+      bathroomOptions: bathrooms,
     };
   }
 }

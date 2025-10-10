@@ -25,12 +25,12 @@ const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
     setFilteredData(initialData);
   }, [initialData]);
 
-  // Apply filters whenever filters or data change
+  // Apply filters whenever filters or data change (use current data)
   useEffect(() => {
     if (Object.keys(filters).length === 0) {
       setFilteredData(data);
     } else {
-      const filtered = marketDataService.filterProperties(filters);
+      const filtered = marketDataService.filterProperties(filters, data);
       setFilteredData(filtered);
     }
   }, [filters, data]);
@@ -48,10 +48,10 @@ const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
     };
   }, [filteredData]);
 
-  // Get data ranges for filter controls
+  // Get data ranges for filter controls (derive from current data)
   const dataRanges = useMemo(() => {
-    return marketDataService.getDataRanges();
-  }, []);
+    return marketDataService.getDataRanges(data);
+  }, [data]);
 
   const handleFilterChange = (newFilters: Partial<MarketFilters>) => {
     setFilters(newFilters);
@@ -309,56 +309,57 @@ const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
           <section className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900">Price Distribution</h2>
-              <DataExporter data={filteredData} filename="market-analysis" />
-            </div>
-            <MarketChart marketData={filteredData} />
-          </section>
+              -              <DataExporter data={filteredData} filename="market-analysis" />
+              +              <DataExporter data={data} filteredData={filteredData} />
+              </div>
+              <MarketChart marketData={filteredData} />
+            </section>
 
-          {/* Property Segments */}
-          <section className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Property Segments</h2>
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">By Bedrooms</h3>
-                <div className="space-y-2">
-                  {propertySegments.byBedrooms.map((segment, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">{segment.label}</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-20 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full" 
-                            style={{ width: `${segment.percentage}%` }}
-                          ></div>
+            {/* Property Segments */}
+            <section className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Property Segments</h2>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">By Bedrooms</h3>
+                  <div className="space-y-2">
+                    {propertySegments.byBedrooms.map((segment, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">{segment.label}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-20 bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-blue-600 h-2 rounded-full" 
+                              style={{ width: `${segment.percentage}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-sm font-medium text-gray-900">{segment.count}</span>
                         </div>
-                        <span className="text-sm font-medium text-gray-900">{segment.count}</span>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">By Price Range</h3>
+                  <div className="space-y-2">
+                    {propertySegments.byPriceRange.map((segment, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">{segment.label}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-20 bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-green-600 h-2 rounded-full" 
+                              style={{ width: `${segment.percentage}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-sm font-medium text-gray-900">{segment.count}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-              
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">By Price Range</h3>
-                <div className="space-y-2">
-                  {propertySegments.byPriceRange.map((segment, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">{segment.label}</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-20 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-green-600 h-2 rounded-full" 
-                            style={{ width: `${segment.percentage}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-sm font-medium text-gray-900">{segment.count}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
+            </section>
         </div>
       )}
 
@@ -367,21 +368,23 @@ const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900">Property Data Table</h2>
-              <DataExporter data={filteredData} filename="property-data-table" />
+              -                <DataExporter data={filteredData} filename="property-data-table" />
+              +                <DataExporter data={data} filteredData={filteredData} />
+              </div>
             </div>
-          </div>
-          <PropertyDataTable data={filteredData} />
-        </section>
+            <PropertyDataTable data={filteredData} />
+          </section>
       )}
 
       {activeView === 'analysis' && (
         <section className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-gray-900">What-If Analysis Tool</h2>
-            <DataExporter data={filteredData} filename="what-if-analysis" />
-          </div>
-          <WhatIfAnalyzer data={filteredData} />
-        </section>
+            -           <DataExporter data={filteredData} filename="what-if-analysis" />
+            +           <DataExporter data={data} filteredData={filteredData} />
+            </div>
+            <WhatIfAnalyzer data={filteredData} />
+          </section>
       )}
     </main>
   );
