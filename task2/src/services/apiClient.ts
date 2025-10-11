@@ -36,7 +36,20 @@ export class ApiClient {
       const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
 
       try {
-        const res = await fetch(input, {
+        // Ensure absolute URL on the server when a relative path is provided
+        const isServer = typeof window === 'undefined';
+        let url: RequestInfo | URL = input;
+        if (isServer && typeof input === 'string' && input.startsWith('/')) {
+          const origin =
+            process.env.NEXT_PUBLIC_SITE_URL ||
+            process.env.SITE_URL ||
+            (process.env.VERCEL_URL
+              ? `https://${process.env.VERCEL_URL}`
+              : `http://127.0.0.1:${process.env.PORT || '3000'}`);
+          url = new URL(input, origin);
+        }
+
+        const res = await fetch(url, {
           ...init,
           signal: init.signal ?? controller.signal,
           cache: init.cache ?? 'no-store',
