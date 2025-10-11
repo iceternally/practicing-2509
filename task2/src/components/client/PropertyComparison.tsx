@@ -143,7 +143,7 @@ const PropertyComparison = ({ properties, onRemoveProperty, onClearAll }: Proper
           <thead>
             <tr className="bg-gray-50">
               <th 
-                className="p-3 text-left font-medium text-gray-900 border-b border-gray-200"
+                className="p-3 text-left font-medium text-gray-900 border-b border-gray-200 w-36 md:w-40"
                 scope="col"
                 id="property-details-header"
               >
@@ -175,7 +175,7 @@ const PropertyComparison = ({ properties, onRemoveProperty, onClearAll }: Proper
           <tbody>
             <tr className="bg-green-50">
               <th 
-                className="p-3 font-medium text-gray-900 border-b border-gray-200 text-left"
+                className="p-3 font-medium text-gray-900 border-b border-gray-200 text-left w-36 md:w-40"
                 scope="row"
                 id="estimated-value-row"
               >
@@ -199,7 +199,7 @@ const PropertyComparison = ({ properties, onRemoveProperty, onClearAll }: Proper
             
             <tr>
               <th 
-                className="p-3 font-medium text-gray-900 border-b border-gray-200 text-left"
+                className="p-3 font-medium text-gray-900 border-b border-gray-200 text-left w-36 md:w-40"
                 scope="row"
                 id="square-footage-row"
               >
@@ -218,7 +218,7 @@ const PropertyComparison = ({ properties, onRemoveProperty, onClearAll }: Proper
             
             <tr className="bg-gray-50">
               <th 
-                className="p-3 font-medium text-gray-900 border-b border-gray-200 text-left"
+                className="p-3 font-medium text-gray-900 border-b border-gray-200 text-left w-36 md:w-40"
                 scope="row"
                 id="bedrooms-row"
               >
@@ -237,7 +237,7 @@ const PropertyComparison = ({ properties, onRemoveProperty, onClearAll }: Proper
             
             <tr>
               <th 
-                className="p-3 font-medium text-gray-900 border-b border-gray-200 text-left"
+                className="p-3 font-medium text-gray-900 border-b border-gray-200 text-left w-36 md:w-40"
                 scope="row"
                 id="bathrooms-row"
               >
@@ -256,7 +256,7 @@ const PropertyComparison = ({ properties, onRemoveProperty, onClearAll }: Proper
             
             <tr className="bg-gray-50">
               <th 
-                className="p-3 font-medium text-gray-900 border-b border-gray-200 text-left"
+                className="p-3 font-medium text-gray-900 border-b border-gray-200 text-left w-36 md:w-40"
                 scope="row"
                 id="year-built-row"
               >
@@ -275,7 +275,7 @@ const PropertyComparison = ({ properties, onRemoveProperty, onClearAll }: Proper
             
             <tr>
               <th 
-                className="p-3 font-medium text-gray-900 border-b border-gray-200 text-left"
+                className="p-3 font-medium text-gray-900 border-b border-gray-200 text-left w-36 md:w-40"
                 scope="row"
                 id="lot-size-row"
               >
@@ -294,7 +294,7 @@ const PropertyComparison = ({ properties, onRemoveProperty, onClearAll }: Proper
             
             <tr className="bg-gray-50">
               <th 
-                className="p-3 font-medium text-gray-900 border-b border-gray-200 text-left"
+                className="p-3 font-medium text-gray-900 border-b border-gray-200 text-left w-36 md:w-40"
                 scope="row"
                 id="distance-row"
               >
@@ -313,7 +313,7 @@ const PropertyComparison = ({ properties, onRemoveProperty, onClearAll }: Proper
             
             <tr>
               <th 
-                className="p-3 font-medium text-gray-900 text-left"
+                className="p-3 font-medium text-gray-900 text-left w-36 md:w-40"
                 scope="row"
                 id="school-rating-row"
               >

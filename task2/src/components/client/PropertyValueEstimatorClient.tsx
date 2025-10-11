@@ -7,19 +7,29 @@ import PropertyComparison, { ComparisonProperty } from './PropertyComparison';
 const PropertyValueEstimatorClient: React.FC = () => {
   const [comparisonProperties, setComparisonProperties] = useState<ComparisonProperty[]>([]);
 
+  const isSameProperty = (a: ComparisonProperty, b: ComparisonProperty) => {
+    const pa = a.propertyData;
+    const pb = b.propertyData;
+    return (
+      a.estimatedValue === b.estimatedValue &&
+      pa.square_footage === pb.square_footage &&
+      pa.bedrooms === pb.bedrooms &&
+      pa.bathrooms === pb.bathrooms &&
+      pa.year_built === pb.year_built &&
+      pa.lot_size === pb.lot_size &&
+      pa.distance_to_city_center === pb.distance_to_city_center &&
+      pa.school_rating === pb.school_rating
+    );
+  };
+
   const handleAddToComparison = (property: ComparisonProperty) => {
     setComparisonProperties(prev => {
-      // Check if property with same name already exists
-      const existingIndex = prev.findIndex(p => p.name === property.name);
-      if (existingIndex !== -1) {
-        // Replace existing property with same name
-        const updated = [...prev];
-        updated[existingIndex] = property;
-        return updated;
-      } else {
-        // Add new property
-        return [...prev, property];
+      // Prevent adding duplicate entries with identical propertyData and estimatedValue
+      const alreadyExists = prev.some(p => isSameProperty(p, property));
+      if (alreadyExists) {
+        return prev; // no change when duplicate
       }
+      return [...prev, property];
     });
   };
 

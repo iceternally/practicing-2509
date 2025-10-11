@@ -5,6 +5,7 @@ import { usePrediction } from '@/hooks';
 
 import { ComparisonProperty } from './PropertyComparison';
 import PropertyResults from './PropertyResults';
+import AddToComparisonButton from './AddToComparisonButton';
 
 interface ValidationErrors {
   square_footage?: string;
@@ -62,6 +63,16 @@ const PropertyForm = ({ onAddToComparison }: PropertyFormProps) => {
   // Refs for accessibility
   const errorSummaryRef = useRef<HTMLDivElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
+  // Track last submitted property data to prevent duplicate requests
+  const lastSubmittedRef = useRef<{
+    square_footage: number;
+    bedrooms: number;
+    bathrooms: number;
+    year_built: number;
+    lot_size: number;
+    distance_to_city_center: number;
+    school_rating: number;
+  } | null>(null);
 
   // Announce messages to screen readers
   useEffect(() => {
@@ -178,6 +189,43 @@ const PropertyForm = ({ onAddToComparison }: PropertyFormProps) => {
       setError('Please fix the validation errors before submitting');
       return;
     }
+
+    // Prevent duplicate submissions: check if current form values match an entry in history
+    const currentPropertyData = {
+      square_footage: Number(formData.square_footage),
+      bedrooms: Number(formData.bedrooms),
+      bathrooms: Number(formData.bathrooms),
+      year_built: Number(formData.year_built),
+      lot_size: Number(formData.lot_size),
+      distance_to_city_center: Number(formData.distance_to_city_center),
+      school_rating: Number(formData.school_rating),
+    };
+
+    const isDuplicateInHistory = history.some((entry) =>
+      entry.propertyData.square_footage === currentPropertyData.square_footage &&
+      entry.propertyData.bedrooms === currentPropertyData.bedrooms &&
+      entry.propertyData.bathrooms === currentPropertyData.bathrooms &&
+      entry.propertyData.year_built === currentPropertyData.year_built &&
+      entry.propertyData.lot_size === currentPropertyData.lot_size &&
+      entry.propertyData.distance_to_city_center === currentPropertyData.distance_to_city_center &&
+      entry.propertyData.school_rating === currentPropertyData.school_rating
+    );
+
+    const isSameAsLastSubmitted = lastSubmittedRef.current &&
+      lastSubmittedRef.current.square_footage === currentPropertyData.square_footage &&
+      lastSubmittedRef.current.bedrooms === currentPropertyData.bedrooms &&
+      lastSubmittedRef.current.bathrooms === currentPropertyData.bathrooms &&
+      lastSubmittedRef.current.year_built === currentPropertyData.year_built &&
+      lastSubmittedRef.current.lot_size === currentPropertyData.lot_size &&
+      lastSubmittedRef.current.distance_to_city_center === currentPropertyData.distance_to_city_center &&
+      lastSubmittedRef.current.school_rating === currentPropertyData.school_rating;
+
+    if (isDuplicateInHistory || isSameAsLastSubmitted) {
+      const msg = 'These property details have already been estimated or are identical to the last submission. Please modify one or more fields before submitting again.';
+      setError(msg);
+      setAnnounceMessage(msg);
+      return;
+    }
   
     try {
       const values = await predict([
@@ -214,6 +262,9 @@ const PropertyForm = ({ onAddToComparison }: PropertyFormProps) => {
         };
   
         setHistory((prev) => [historyEntry, ...prev]);
+
+        // Record last submitted values to prevent immediate resubmission with same data
+        lastSubmittedRef.current = { ...historyEntry.propertyData };
   
         // Focus on result after a brief delay
         setTimeout(() => {
@@ -670,6 +721,14 @@ const PropertyForm = ({ onAddToComparison }: PropertyFormProps) => {
                     <dd>{entry.propertyData.school_rating}/10</dd>
                   </div>
                 </dl>
+                
+                <div className="mt-3">
+                  <AddToComparisonButton 
+                    prediction={entry.estimatedValue}
+                    onAddToComparison={onAddToComparison}
+                    propertyData={entry.propertyData}
+                  />
+                </div>
               </article>
             ))}
           </div>

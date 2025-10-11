@@ -2,7 +2,6 @@
 
 import React from 'react';
 import PropertyResultsDisplay from './PropertyResultsDisplay';
-import AddToComparisonButton from './AddToComparisonButton';
 import { ComparisonProperty } from './PropertyComparison';
 
 interface PropertyResultsProps {
@@ -35,13 +34,6 @@ const PropertyResults: React.FC<PropertyResultsProps> = ({
         error={error}
         resultRef={resultRef}
       />
-      {prediction !== null && (
-        <AddToComparisonButton
-          prediction={prediction}
-          onAddToComparison={onAddToComparison}
-          propertyData={propertyData}
-        />
-      )}
     </div>
   );
 };
