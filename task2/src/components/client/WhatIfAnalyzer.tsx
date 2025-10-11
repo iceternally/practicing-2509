@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { PropertyData } from '@/services/marketDataService';
 import { Calculator, TrendingUp, Home, MapPin } from 'lucide-react';
+import { usePrediction } from '@/hooks/usePrediction';
 
 interface WhatIfAnalyzerProps {
   data: PropertyData[];
@@ -31,54 +32,52 @@ const WhatIfAnalyzer = ({ data }: WhatIfAnalyzerProps) => {
 
   const [scenarios, setScenarios] = useState<Array<{ name: string; inputs: PropertyInputs; estimatedPrice: number }>>([]);
 
+  const { predict, cancel } = usePrediction();
+
   // Simple price estimation model based on similar properties
-  const estimatePrice = (propertyInputs: PropertyInputs): number => {
-    if (data.length === 0) return 0;
-
-    // Find similar properties (within reasonable ranges)
-    const similarProperties = data.filter(property => {
-      const sqftDiff = Math.abs(property.square_footage - propertyInputs.square_footage) / propertyInputs.square_footage;
-      const bedroomMatch = property.bedrooms === propertyInputs.bedrooms;
-      const yearDiff = Math.abs(property.year_built - propertyInputs.year_built);
-      
-      return sqftDiff <= 0.3 && bedroomMatch && yearDiff <= 10;
-    });
-
-    if (similarProperties.length === 0) {
-      // Fallback to all properties if no similar ones found
-      const avgPricePerSqFt = data.reduce((sum, p) => sum + (p.price / p.square_footage), 0) / data.length;
-      return Math.round(avgPricePerSqFt * propertyInputs.square_footage);
+  const estimatePrice = async (propertyInputs: PropertyInputs): Promise<number> => {
+    try {
+      const values = await predict([
+        {
+          square_footage: propertyInputs.square_footage,
+          bedrooms: propertyInputs.bedrooms,
+          bathrooms: propertyInputs.bathrooms,
+          year_built: propertyInputs.year_built,
+          lot_size: propertyInputs.lot_size,
+          distance_to_city_center: propertyInputs.distance_to_city_center,
+          school_rating: propertyInputs.school_rating,
+        },
+      ]);
+      if (values && values.length > 0) {
+        return Math.round(values[0]);
+      }
+      return 0;
+    } catch (e) {
+      return 0;
     }
-
-    // Calculate weighted average based on similarity
-    let totalWeight = 0;
-    let weightedPrice = 0;
-
-    similarProperties.forEach(property => {
-      // Calculate similarity weights
-      const sqftWeight = 1 - Math.abs(property.square_footage - propertyInputs.square_footage) / propertyInputs.square_footage;
-      const yearWeight = 1 - Math.abs(property.year_built - propertyInputs.year_built) / 50;
-      const schoolWeight = 1 - Math.abs(property.school_rating - propertyInputs.school_rating) / 10;
-      const distanceWeight = 1 - Math.abs(property.distance_to_city_center - propertyInputs.distance_to_city_center) / 10;
-      
-      const weight = (sqftWeight + yearWeight + schoolWeight + distanceWeight) / 4;
-      
-      totalWeight += weight;
-      weightedPrice += property.price * weight;
-    });
-
-    return Math.round(weightedPrice / totalWeight);
   };
 
-  const currentEstimate = useMemo(() => estimatePrice(inputs), [inputs, data]);
+  const [currentEstimate, setCurrentEstimate] = useState<number>(0);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const val = await estimatePrice(inputs);
+      if (mounted) setCurrentEstimate(val);
+    })();
+    return () => {
+      mounted = false;
+      cancel();
+    };
+  }, [inputs]);
 
   const handleInputChange = (field: keyof PropertyInputs, value: number) => {
     setInputs(prev => ({ ...prev, [field]: value }));
   };
 
-  const addScenario = () => {
+  const addScenario = async () => {
     const scenarioName = `Scenario ${scenarios.length + 1}`;
-    const estimatedPrice = estimatePrice(inputs);
+    const estimatedPrice = await estimatePrice(inputs);
     setScenarios(prev => [...prev, { name: scenarioName, inputs: { ...inputs }, estimatedPrice }]);
   };
 
