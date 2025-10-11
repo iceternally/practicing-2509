@@ -21,6 +21,7 @@ const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
   const [filters, setFilters] = useState<Partial<MarketFilters>>({});
   const [activeView, setActiveView] = useState<'overview' | 'table' | 'analysis'>('overview');
   const [showFilters, setShowFilters] = useState(false);
+  const [showExport, setShowExport] = useState(false);
 
   // Update filtered data when data changes
   useEffect(() => {
@@ -334,11 +335,10 @@ const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
           <section className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900">Price Distribution</h2>
-              -              <DataExporter data={filteredData} filename="market-analysis" />
-              +              <DataExporter data={data} filteredData={filteredData} />
-              </div>
-              <MarketChart marketData={filteredData} />
-            </section>
+              {/* Removed Export Data section from Overview */}
+            </div>
+            <MarketChart marketData={filteredData} />
+          </section>
 
             {/* Property Segments */}
             <section className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
@@ -393,23 +393,33 @@ const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900">Property Data Table</h2>
-              -                <DataExporter data={filteredData} filename="property-data-table" />
-              +                <DataExporter data={data} filteredData={filteredData} />
-              </div>
+              <button
+                onClick={() => setShowExport(!showExport)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+                aria-expanded={showExport}
+                aria-controls="export-section"
+              >
+                Export Data
+              </button>
             </div>
-            <PropertyDataTable data={filteredData} />
-          </section>
+            {showExport && (
+              <div id="export-section" className="mt-4">
+                <DataExporter data={data} filteredData={filteredData} />
+              </div>
+            )}
+          </div>
+          <PropertyDataTable data={filteredData} />
+        </section>
       )}
 
       {activeView === 'analysis' && (
         <section className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-gray-900">What-If Analysis Tool</h2>
-            -           <DataExporter data={filteredData} filename="what-if-analysis" />
-            +           <DataExporter data={data} filteredData={filteredData} />
-            </div>
-            <WhatIfAnalyzer data={filteredData} />
-          </section>
+            {/* Removed Export Data section from What-If */}
+          </div>
+          <WhatIfAnalyzer data={filteredData} />
+        </section>
       )}
     </main>
   );

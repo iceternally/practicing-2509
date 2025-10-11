@@ -28,7 +28,7 @@ ChartJS.register(
 
 const MarketChart = ({ marketData }: { marketData: PropertyData[] }) => {
   const [showDataTable, setShowDataTable] = useState(false);
-  const [chartType, setChartType] = useState<'price-by-year' | 'price-by-neighborhood' | 'price-by-type'>('price-by-year');
+  const [chartType, setChartType] = useState<'price-by-year' | 'price-by-school-rating'>('price-by-year')
 
   // Process data for different chart types
   const chartData = useMemo(() => {
@@ -58,6 +58,31 @@ const MarketChart = ({ marketData }: { marketData: PropertyData[] }) => {
             backgroundColor: 'rgb(75, 192, 192)',
             borderColor: 'rgba(75, 192, 192, 1)',
             tension: 0.1,
+          }],
+        };
+
+      case 'price-by-school-rating':
+        // Group properties by rounded school rating and calculate average price
+        const schoolGroups = marketData.reduce((acc, property) => {
+          const rating = Math.round(property.school_rating);
+          if (!acc[rating]) acc[rating] = [];
+          acc[rating].push(property.price);
+          return acc;
+        }, {} as Record<number, number[]>);
+
+        const schoolLabels = Object.keys(schoolGroups).sort((a, b) => parseInt(a) - parseInt(b));
+        const schoolPrices = Object.values(schoolGroups).map(prices =>
+          Math.round(prices.reduce((sum, price) => sum + price, 0) / prices.length)
+        );
+
+        return {
+          labels: schoolLabels,
+          datasets: [{
+            label: 'Average Price by School Rating',
+            data: schoolPrices,
+            backgroundColor: 'rgba(54, 162, 235, 0.8)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
           }],
         };
 
@@ -146,9 +171,7 @@ const MarketChart = ({ marketData }: { marketData: PropertyData[] }) => {
       },
       title: {
         display: true,
-        text: chartType === 'price-by-year' ? 'Average Property Prices by Decade Built' :
-              chartType === 'price-by-neighborhood' ? 'Average Property Prices by Neighborhood' :
-              'Average Property Prices by Property Type',
+        text: chartType === 'price-by-year' ? 'Average Property Prices by Decade Built' : 'Average Property Prices by School Rating',
       },
     },
     scales: {
@@ -159,21 +182,19 @@ const MarketChart = ({ marketData }: { marketData: PropertyData[] }) => {
           text: 'Average Price ($)',
         },
         ticks: {
-          callback: function(value: any) {
-            return '$' + value.toLocaleString();
-          }
-        }
+          callback: function (value: any) {
+            return '$' + value.toLocaleString()
+          },
+        },
       },
       x: {
         title: {
           display: true,
-          text: chartType === 'price-by-year' ? 'Decade Built' :
-                chartType === 'price-by-neighborhood' ? 'Neighborhood' :
-                'Property Type',
+          text: chartType === 'price-by-year' ? 'Decade Built' : 'School Rating (1-10)',
         },
       },
     },
-  }), [chartType]);
+  }), [chartType])
 
   // Generate chart description for screen readers
   const generateChartDescription = () => {
@@ -206,8 +227,7 @@ const MarketChart = ({ marketData }: { marketData: PropertyData[] }) => {
             className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="price-by-year">Price by Decade Built</option>
-            <option value="price-by-neighborhood">Price by Neighborhood</option>
-            <option value="price-by-type">Price by Property Type</option>
+            <option value="price-by-school-rating">Price by School Rating</option>
           </select>
           
           <button
@@ -233,7 +253,7 @@ const MarketChart = ({ marketData }: { marketData: PropertyData[] }) => {
         <div 
           className="chart-container mb-6"
           role="img"
-          aria-label={`Chart showing property prices by ${chartType.replace('-', ' ')}`}
+          aria-label={`Chart showing property prices by ${chartType === 'price-by-year' ? 'decade built' : 'school rating'}`}
           tabIndex={0}
         >
           {chartType === 'price-by-year' ? (
@@ -277,9 +297,7 @@ const MarketChart = ({ marketData }: { marketData: PropertyData[] }) => {
                   scope="col"
                   id="category-header"
                 >
-                  {chartType === 'price-by-year' ? 'Decade Built' :
-                   chartType === 'price-by-neighborhood' ? 'Neighborhood' :
-                   'Property Type'}
+                  {chartType === 'price-by-year' ? 'Decade Built' : 'School Rating'}
                 </th>
                 <th 
                   className="border border-gray-300 px-4 py-2 text-left"
