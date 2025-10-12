@@ -119,4 +119,19 @@ class MarketAnalysisServiceTest {
         assertTrue(forecast.getDescription().contains("APARTMENT"));
         assertNotNull(forecast.getVolatility());
     }
+
+    // New tests related to housing data and stats
+    @Test
+    void testGetHousingData_missingCsv_throwsRuntimeException() {
+        // When & Then: Since data/housing.csv is not present by default, the service should throw.
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> marketAnalysisService.getHousingData());
+        assertTrue(ex.getMessage().toLowerCase().contains("housing"));
+    }
+
+    @Test
+    void testGetHousingStats_missingCsv_throwsRuntimeException() {
+        // When & Then: getHousingStats internally reads the CSV; with missing file it should throw.
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> marketAnalysisService.getHousingStats());
+        assertTrue(ex.getMessage().toLowerCase().contains("housing"));
+    }
 }
