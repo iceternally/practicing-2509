@@ -1,6 +1,7 @@
 package com.example.propertymarketanalysis.controller;
 
 import com.example.propertymarketanalysis.dto.Housing;
+import com.example.propertymarketanalysis.dto.HousingStats;
 import com.example.propertymarketanalysis.dto.MarketAnalysisRequest;
 import com.example.propertymarketanalysis.dto.MarketAnalysisResponse;
 import com.example.propertymarketanalysis.dto.MarketData;
@@ -102,5 +103,15 @@ public class MarketAnalysisController {
     @GetMapping("/health")
     public ResponseEntity<String> healthCheck() {
         return ResponseEntity.ok("Market Analysis API is running");
+    }
+    
+    /**
+     * Get aggregate housing statistics
+     * GET /api/market-analysis/housing/stats
+     */
+    @GetMapping("/housing/stats")
+    public ResponseEntity<HousingStats> getHousingStats() {
+        HousingStats stats = marketAnalysisService.getHousingStats();
+        return ResponseEntity.ok(stats);
     }
 }

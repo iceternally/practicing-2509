@@ -1,6 +1,7 @@
 package com.example.propertymarketanalysis.service;
 
 import com.example.propertymarketanalysis.dto.Housing;
+import com.example.propertymarketanalysis.dto.HousingStats;
 import com.example.propertymarketanalysis.dto.MarketAnalysisRequest;
 import com.example.propertymarketanalysis.dto.MarketAnalysisResponse;
 import com.example.propertymarketanalysis.dto.MarketData;
@@ -192,5 +193,37 @@ public class MarketAnalysisServiceImpl implements MarketAnalysisService {
         }
         
         return housingList;
+    }
+    
+    @Override
+    public HousingStats getHousingStats() {
+        List<Housing> housingList = getHousingData();
+        int count = housingList.size();
+
+        Double averagePrice = housingList.stream().mapToInt(Housing::getPrice).average().orElse(0.0);
+        Integer minPrice = housingList.isEmpty() ? null : housingList.stream().mapToInt(Housing::getPrice).min().getAsInt();
+        Integer maxPrice = housingList.isEmpty() ? null : housingList.stream().mapToInt(Housing::getPrice).max().getAsInt();
+
+        Double averageBedrooms = housingList.stream().mapToInt(Housing::getBedrooms).average().orElse(0.0);
+        Double averageBathrooms = housingList.stream().mapToDouble(Housing::getBathrooms).average().orElse(0.0);
+        Double averageSquareFootage = housingList.stream().mapToInt(Housing::getSquareFootage).average().orElse(0.0);
+        Double averageYearBuilt = housingList.stream().mapToInt(Housing::getYearBuilt).average().orElse(0.0);
+        Double averageLotSize = housingList.stream().mapToInt(Housing::getLotSize).average().orElse(0.0);
+        Double averageDistanceToCityCenter = housingList.stream().mapToDouble(Housing::getDistanceToCityCenter).average().orElse(0.0);
+        Double averageSchoolRating = housingList.stream().mapToDouble(Housing::getSchoolRating).average().orElse(0.0);
+
+        return new HousingStats(
+                count,
+                averagePrice,
+                minPrice,
+                maxPrice,
+                averageBedrooms,
+                averageBathrooms,
+                averageSquareFootage,
+                averageYearBuilt,
+                averageLotSize,
+                averageDistanceToCityCenter,
+                averageSchoolRating
+        );
     }
 }

@@ -1,6 +1,7 @@
 package com.example.propertymarketanalysis.service;
 
 import com.example.propertymarketanalysis.dto.Housing;
+import com.example.propertymarketanalysis.dto.HousingStats;
 import com.example.propertymarketanalysis.dto.MarketAnalysisRequest;
 import com.example.propertymarketanalysis.dto.MarketAnalysisResponse;
 import com.example.propertymarketanalysis.dto.MarketData;
@@ -39,4 +40,9 @@ public interface MarketAnalysisService {
      * Get all housing data from CSV file
      */
     List<Housing> getHousingData();
+    
+    /**
+     * Get aggregate statistics for housing dataset
+     */
+    HousingStats getHousingStats();
 }
