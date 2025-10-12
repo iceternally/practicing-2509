@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/task2"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "maven"
+    directory: "/task2/backend-java"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "pip"
+    directory: "/task1"
+    schedule:
+      interval: "weekly"
