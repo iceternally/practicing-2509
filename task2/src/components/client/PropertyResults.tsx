@@ -2,7 +2,7 @@
 
 import React from 'react';
 import PropertyResultsDisplay from './PropertyResultsDisplay';
-import { ComparisonProperty } from './PropertyComparison';
+import type { ComparisonProperty } from './PropertyComparison';
 
 interface PropertyResultsProps {
   prediction: number | null;
@@ -24,8 +24,6 @@ const PropertyResults: React.FC<PropertyResultsProps> = ({
   prediction,
   error,
   resultRef,
-  onAddToComparison,
-  propertyData
 }) => {
   return (
     <div className="property-results">

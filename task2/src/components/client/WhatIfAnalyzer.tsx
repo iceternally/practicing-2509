@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { PropertyData } from '@/services/marketDataService';
-import { Calculator, TrendingUp, Home, MapPin } from 'lucide-react';
+import { Calculator, TrendingUp, Home } from 'lucide-react';
 import { usePrediction } from '@/hooks/usePrediction';
 
 interface WhatIfAnalyzerProps {
@@ -35,7 +35,7 @@ const WhatIfAnalyzer = ({ data }: WhatIfAnalyzerProps) => {
   const { predict, cancel } = usePrediction();
 
   // Simple price estimation model based on similar properties
-  const estimatePrice = async (propertyInputs: PropertyInputs): Promise<number> => {
+  const estimatePrice = useCallback(async (propertyInputs: PropertyInputs): Promise<number> => {
     try {
       const values = await predict([
         {
@@ -55,7 +55,7 @@ const WhatIfAnalyzer = ({ data }: WhatIfAnalyzerProps) => {
     } catch (e) {
       return 0;
     }
-  };
+  }, [predict]);
 
   const [currentEstimate, setCurrentEstimate] = useState<number>(0);
 
