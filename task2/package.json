@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "cross-env VITE_CJS_IGNORE_WARNING=true vitest",
+    "coverage": "cross-env VITE_CJS_IGNORE_WARNING=true vitest --run --coverage",
+    "test:watch": "cross-env VITE_CJS_IGNORE_WARNING=true vitest --watch"
   },
   "dependencies": {
     "@tanstack/react-table": "^8.21.3",
@@ -27,9 +30,12 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^7.0.3",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^1.5.0",
+    "@vitest/coverage-v8": "1.6.1"
   }
 }
