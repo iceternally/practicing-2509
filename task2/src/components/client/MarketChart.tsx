@@ -86,78 +86,6 @@ const MarketChart = ({ marketData }: { marketData: PropertyData[] }) => {
           }],
         };
 
-      case 'price-by-neighborhood':
-        // Group by neighborhood
-        const neighborhoodGroups = marketData.reduce((acc, property) => {
-          if (!acc[property.neighborhood]) acc[property.neighborhood] = [];
-          acc[property.neighborhood].push(property.price);
-          return acc;
-        }, {} as Record<string, number[]>);
-
-        const neighborhoodLabels = Object.keys(neighborhoodGroups);
-        const neighborhoodPrices = Object.values(neighborhoodGroups).map(prices => 
-          Math.round(prices.reduce((sum, price) => sum + price, 0) / prices.length)
-        );
-
-        return {
-          labels: neighborhoodLabels,
-          datasets: [{
-            label: 'Average Price by Neighborhood',
-            data: neighborhoodPrices,
-            backgroundColor: [
-              'rgba(255, 99, 132, 0.8)',
-              'rgba(54, 162, 235, 0.8)',
-              'rgba(255, 205, 86, 0.8)',
-              'rgba(75, 192, 192, 0.8)',
-              'rgba(153, 102, 255, 0.8)',
-              'rgba(255, 159, 64, 0.8)',
-            ],
-            borderColor: [
-              'rgba(255, 99, 132, 1)',
-              'rgba(54, 162, 235, 1)',
-              'rgba(255, 205, 86, 1)',
-              'rgba(75, 192, 192, 1)',
-              'rgba(153, 102, 255, 1)',
-              'rgba(255, 159, 64, 1)',
-            ],
-            borderWidth: 1,
-          }],
-        };
-
-      case 'price-by-type':
-        // Group by property type
-        const typeGroups = marketData.reduce((acc, property) => {
-          if (!acc[property.property_type]) acc[property.property_type] = [];
-          acc[property.property_type].push(property.price);
-          return acc;
-        }, {} as Record<string, number[]>);
-
-        const typeLabels = Object.keys(typeGroups);
-        const typePrices = Object.values(typeGroups).map(prices => 
-          Math.round(prices.reduce((sum, price) => sum + price, 0) / prices.length)
-        );
-
-        return {
-          labels: typeLabels,
-          datasets: [{
-            label: 'Average Price by Property Type',
-            data: typePrices,
-            backgroundColor: [
-              'rgba(255, 99, 132, 0.8)',
-              'rgba(54, 162, 235, 0.8)',
-              'rgba(255, 205, 86, 0.8)',
-              'rgba(75, 192, 192, 0.8)',
-            ],
-            borderColor: [
-              'rgba(255, 99, 132, 1)',
-              'rgba(54, 162, 235, 1)',
-              'rgba(255, 205, 86, 1)',
-              'rgba(75, 192, 192, 1)',
-            ],
-            borderWidth: 1,
-          }],
-        };
-
       default:
         return null;
     }
@@ -182,8 +110,9 @@ const MarketChart = ({ marketData }: { marketData: PropertyData[] }) => {
           text: 'Average Price ($)',
         },
         ticks: {
-          callback: function (value: any) {
-            return '$' + value.toLocaleString()
+          callback: function (value: number | string) {
+            const num = typeof value === 'string' ? Number(value) : value;
+            return '$' + num.toLocaleString();
           },
         },
       },
@@ -223,7 +152,7 @@ const MarketChart = ({ marketData }: { marketData: PropertyData[] }) => {
         <div className="flex flex-wrap gap-2">
           <select
             value={chartType}
-            onChange={(e) => setChartType(e.target.value as any)}
+            onChange={(e) => setChartType(e.target.value as 'price-by-year' | 'price-by-school-rating')}
             className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="price-by-year">Price by Decade Built</option>

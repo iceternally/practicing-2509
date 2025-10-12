@@ -51,8 +51,7 @@ const PropertyForm = ({ onAddToComparison }: PropertyFormProps) => {
   const [prediction, setPrediction] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
-  // Removed local isSubmitting state in favor of hook loading state
-  // const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [announceMessage, setAnnounceMessage] = useState<string>('');
   

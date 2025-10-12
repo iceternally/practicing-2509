@@ -101,6 +101,8 @@ const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowFilters(!showFilters)}
+            aria-expanded={showFilters}
+            aria-controls="filters-panel"
             className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
               showFilters 
                 ? 'bg-blue-50 border-blue-200 text-blue-700' 
@@ -158,9 +160,9 @@ const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
 
       {/* Filters Panel */}
       {showFilters && (
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+        <div id="filters-panel" className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm" aria-labelledby="filters-heading">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
+            <h2 id="filters-heading" className="text-lg font-semibold text-gray-900">Filters</h2>
             <button
               onClick={clearFilters}
               className="text-sm text-blue-600 hover:text-blue-800 font-medium"
@@ -168,18 +170,26 @@ const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
               Clear All
             </button>
           </div>
+
+          <p id="filters-instructions" className="text-sm text-gray-600 mb-4">
+            Adjust the filters to refine the property list. The Bedrooms control supports multiple selection.
+          </p>
+          <fieldset aria-describedby="filters-instructions" className="contents">
+          <legend className="sr-only">Filter properties</legend>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {/* Price Range Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="filter-price-min" className="block text-sm font-medium text-gray-700 mb-2">
                 Price Range
               </label>
               <div className="space-y-2">
                 <input
+                  id="filter-price-min"
                   type="range"
                   min={dataRanges.priceRange.min}
                   max={dataRanges.priceRange.max}
+                  aria-describedby="price-range-values"
                   value={filters.priceRange?.min || dataRanges.priceRange.min}
                   onChange={(e) => handleFilterChange({
                     ...filters,
@@ -190,7 +200,7 @@ const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
                   })}
                   className="w-full"
                 />
-                <div className="flex justify-between text-xs text-gray-500">
+                <div id="price-range-values" className="flex justify-between text-xs text-gray-500">
                   <span>${(filters.priceRange?.min || dataRanges.priceRange.min).toLocaleString()}</span>
                   <span>${(filters.priceRange?.max || dataRanges.priceRange.max).toLocaleString()}</span>
                 </div>
@@ -199,12 +209,14 @@ const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
 
             {/* Bedrooms Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="filter-bedrooms" className="block text-sm font-medium text-gray-700 mb-2">
                 Bedrooms
               </label>
               <select
+                id="filter-bedrooms"
                 multiple
-                value={filters.bedrooms || []}
+                aria-describedby="bedrooms-help"
+                value={(filters.bedrooms as unknown as string[]) || []}
                 onChange={(e) => {
                   const values = Array.from(e.target.selectedOptions, option => parseInt(option.value));
                   handleFilterChange({ ...filters, bedrooms: values });
@@ -217,18 +229,23 @@ const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
                   </option>
                 ))}
               </select>
+              <p id="bedrooms-help" className="mt-2 text-xs text-gray-500">
+                To select multiple bedrooms, hold Ctrl (Windows) or Command (Mac) while clicking. Use Arrow keys to navigate and Space to toggle selection.
+              </p>
             </div>
 
             {/* Square Footage Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="filter-sqft-min" className="block text-sm font-medium text-gray-700 mb-2">
                 Square Footage
               </label>
               <div className="space-y-2">
                 <input
+                  id="filter-sqft-min"
                   type="range"
                   min={dataRanges.squareFootageRange.min}
                   max={dataRanges.squareFootageRange.max}
+                  aria-describedby="sqft-range-values"
                   value={filters.squareFootageRange?.min || dataRanges.squareFootageRange.min}
                   onChange={(e) => handleFilterChange({
                     ...filters,
@@ -239,7 +256,7 @@ const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
                   })}
                   className="w-full"
                 />
-                <div className="flex justify-between text-xs text-gray-500">
+                <div id="sqft-range-values" className="flex justify-between text-xs text-gray-500">
                   <span>{(filters.squareFootageRange?.min || dataRanges.squareFootageRange.min).toLocaleString()} sq ft</span>
                   <span>{(filters.squareFootageRange?.max || dataRanges.squareFootageRange.max).toLocaleString()} sq ft</span>
                 </div>
@@ -248,15 +265,17 @@ const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
 
             {/* School Rating Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="filter-school-rating-min" className="block text-sm font-medium text-gray-700 mb-2">
                 School Rating
               </label>
               <div className="space-y-2">
                 <input
+                  id="filter-school-rating-min"
                   type="range"
                   min={dataRanges.schoolRatingRange.min}
                   max={dataRanges.schoolRatingRange.max}
                   step="0.1"
+                  aria-describedby="school-rating-values"
                   value={filters.schoolRatingRange?.min || dataRanges.schoolRatingRange.min}
                   onChange={(e) => handleFilterChange({
                     ...filters,
@@ -267,13 +286,14 @@ const MarketDashboard = ({ marketData: initialData }: MarketDashboardProps) => {
                   })}
                   className="w-full"
                 />
-                <div className="flex justify-between text-xs text-gray-500">
+                <div id="school-rating-values" className="flex justify-between text-xs text-gray-500">
                   <span>{(filters.schoolRatingRange?.min || dataRanges.schoolRatingRange.min).toFixed(1)}</span>
                   <span>{(filters.schoolRatingRange?.max || dataRanges.schoolRatingRange.max).toFixed(1)}</span>
                 </div>
               </div>
             </div>
           </div>
+          </fieldset>
         </div>
       )}
 

@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Normalize box-sizing for predictable layouts */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Add UA color scheme hint for consistent built-in UI rendering */
+:root {
+  color-scheme: light dark;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -16,6 +24,9 @@
   --high-contrast-bg: #ffffff;
   --high-contrast-text: #000000;
   --high-contrast-border: #000000;
+  
+  /* Neutral border color used across components */
+  --border-color: #e5e7eb;
 }
 
 @theme inline {
@@ -33,6 +44,9 @@
     --high-contrast-bg: #000000;
     --high-contrast-text: #ffffff;
     --high-contrast-border: #ffffff;
+    
+    /* Dark mode neutral border color */
+    --border-color: #2d2d2d;
   }
 }
 
@@ -63,7 +77,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   line-height: 1.6; /* Improved readability */
 }
 
@@ -79,18 +93,6 @@ body {
 }
 
 *:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 2px var(--focus-ring-offset), 0 0 0 4px var(--focus-ring);
-}
-
-/* Enhanced focus for interactive elements */
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible,
-[tabindex]:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
   box-shadow: 0 0 0 2px var(--focus-ring-offset), 0 0 0 4px var(--focus-ring);
@@ -141,10 +143,11 @@ select:focus-visible,
 }
 
 /* Ensure sufficient color contrast for text */
-.text-contrast-high {
+/* Removed unused text-contrast-high utility */
+/* .text-contrast-high {
   color: var(--high-contrast-text);
   background-color: var(--high-contrast-bg);
-}
+} */
 
 /* Error states with proper contrast */
 .error {
@@ -167,16 +170,18 @@ select:focus-visible,
   border-color: var(--info-color);
 }
 
-/* Ensure interactive elements have minimum touch target size */
-button,
-a,
-input,
-textarea,
-select,
-[role="button"],
-[role="link"] {
-  min-height: 44px;
-  min-width: 44px;
+/* Ensure interactive elements have minimum touch target size on touch devices */
+@media (pointer: coarse) {
+  button,
+  a,
+  input,
+  textarea,
+  select,
+  [role="button"],
+  [role="link"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 /* Improve readability with better line spacing */
@@ -212,7 +217,7 @@ th,
 td {
   text-align: left;
   padding: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
 }
 
 th {

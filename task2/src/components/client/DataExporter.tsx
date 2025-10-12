@@ -5,7 +5,6 @@ import { PropertyData } from '@/services/marketDataService';
 import { Download, FileText, Table, Loader2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-// @ts-ignore
 import { saveAs } from 'file-saver';
 
 interface DataExporterProps {
@@ -26,18 +25,14 @@ const DataExporter = ({ data, filteredData, dashboardRef }: DataExporterProps) =
       // Create CSV headers
       const headers = [
         'ID',
-        'Address',
         'Price',
         'Square Footage',
         'Bedrooms',
         'Bathrooms',
         'Year Built',
         'Lot Size',
-        'Property Type',
         'Distance to City Center',
-        'School Rating',
-        'Crime Rate',
-        'Neighborhood'
+        'School Rating'
       ];
 
       // Create CSV rows
@@ -45,18 +40,14 @@ const DataExporter = ({ data, filteredData, dashboardRef }: DataExporterProps) =
         headers.join(','),
         ...dataToExport.map(property => [
           property.id,
-          `"${property.address}"`,
           property.price,
           property.square_footage,
           property.bedrooms,
           property.bathrooms,
           property.year_built,
           property.lot_size,
-          `"${property.property_type}"`,
           property.distance_to_city_center,
-          property.school_rating,
-          property.crime_rate,
-          `"${property.neighborhood}"`
+          property.school_rating
         ].join(','))
       ];
 
@@ -123,8 +114,8 @@ const DataExporter = ({ data, filteredData, dashboardRef }: DataExporterProps) =
       yPosition += 10;
 
       // Table headers
-      const headers = ['Address', 'Price', 'Sq Ft', 'Bed/Bath', 'Year', 'Type'];
-      const colWidths = [60, 25, 20, 20, 15, 30];
+      const headers = ['ID', 'Price', 'Sq Ft', 'Bed/Bath', 'Year', 'School Rating'];
+      const colWidths = [20, 25, 20, 20, 15, 30];
       let xPosition = margin;
 
       pdf.setFontSize(8);
@@ -145,12 +136,12 @@ const DataExporter = ({ data, filteredData, dashboardRef }: DataExporterProps) =
 
         xPosition = margin;
         const rowData = [
-          property.address.length > 25 ? property.address.substring(0, 25) + '...' : property.address,
+          property.id.toString(),
           `$${(property.price / 1000).toFixed(0)}k`,
           property.square_footage.toString(),
           `${property.bedrooms}/${property.bathrooms}`,
           property.year_built.toString(),
-          property.property_type.length > 12 ? property.property_type.substring(0, 12) + '...' : property.property_type
+          property.school_rating.toFixed(1)
         ];
 
         rowData.forEach((data, index) => {
