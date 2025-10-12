@@ -8,6 +8,7 @@ import com.example.propertymarketanalysis.dto.MarketData;
 import com.example.propertymarketanalysis.dto.MarketTrend;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -196,6 +197,7 @@ public class MarketAnalysisServiceImpl implements MarketAnalysisService {
     }
     
     @Override
+    @Cacheable(cacheNames = "housingStats", keyGenerator = "housingStatsKeyGenerator")
     public HousingStats getHousingStats() {
         List<Housing> housingList = getHousingData();
         int count = housingList.size();
